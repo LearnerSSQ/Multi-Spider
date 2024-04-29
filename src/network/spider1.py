@@ -35,7 +35,7 @@ class Spider1:
                     sys.exit(1)
 
     @staticmethod
-    def crawler(data_send_nbr: list, data_sum_content: list, request_main_url: str, request_deputy_url: str,
+    def crawler(data_send_nbr: list, data_sms_content: list, request_main_url: str, request_deputy_url: str,
                 request_main_data: dict, request_deputy_data: dict, request_headers: dict) -> list:
         values = []
         empty_value = ['']
@@ -45,18 +45,19 @@ class Spider1:
         with Progress(console=console, refresh_per_second=1) as progress:
             task = progress.add_task("[bold cyan]Crawling datas...", total=len(data_send_nbr))
 
-            for idx, (send_nbr, sum_content) in enumerate(zip(data_send_nbr, data_sum_content), start=2):
+            for idx, (send_nbr, sms_content) in enumerate(zip(data_send_nbr, data_sms_content), start=2):
                 progress.update(task, advance=1)
                 request_main_data.update({'send_nbr': str(send_nbr)})
                 main_response = Spider1.send_request(request_main_url, request_main_data, request_headers)
 
                 if main_response.status_code == 200:
                     console.print(f"\n[bold red]错误:[/bold red] 号码无效于 {request_main_url}"
-                                  f"\n行数: {idx} 号码: {send_nbr}")
+                                  f"\n行数: {idx} 号码: {send_nbr}"
+                                  f"\n短信内容: {sms_content}")
                     values.append(number_error)
                     continue
 
-                request_deputy_data.update({'send_nbr': send_nbr, 'sum_content': sum_content})
+                request_deputy_data.update({'send_nbr': send_nbr, 'sms_content': sms_content})
                 deputy_response = Spider1.send_request(request_deputy_url, request_deputy_data, request_headers)
 
                 if deputy_response.status_code == 200:
@@ -64,7 +65,8 @@ class Spider1:
 
                 else:
                     console.print(f"\n[bold red]错误:[/bold red] 响应无效于 {request_deputy_url}"
-                                  f"\n行数: {idx} 号码: {send_nbr}")
+                                  f"\n行数: {idx} 号码: {send_nbr}"
+                                  f"\n短信内容: {sms_content}")
                     values.append(connect_error)
                     continue
 
